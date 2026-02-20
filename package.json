@@ -1,7 +1,7 @@
 {
-  "name": "advanced-authentication",
+  "name": "authentication-system",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Full MERN Stack Authentication System",
   "main": "./backend/index.js",
   "scripts": {
     "dev": "nodemon ./backend/index.js"

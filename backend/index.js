@@ -1,11 +1,21 @@
+import dotenv from "dotenv";
 import express from "express";
+import { connectToDatabase } from "./database/connect-to-database.js";
+import authRoutes from './routes/auth-routes.js'
 
 const app = express();
 
+dotenv.config();
+
+const PORT = process.env.PORT;
+
 app.get("/", (req, res) => {
-  res.send("Hello world");
+  res.send("Home Page");
 })
 
-app.listen(5000, () => {
-  console.log("Server is up...")
+app.use("/api/auth", authRoutes);
+
+app.listen(PORT, () => {
+  connectToDatabase();
+  console.log(`Server is up on port: ${PORT}`)
 })
