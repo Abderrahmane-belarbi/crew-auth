@@ -40,11 +40,6 @@ export async function signup(req, res) {
     const token = generateTokenSetCookie(res, createdUser._id);
 
     if (createdUser) {
-      console.log("process.env.SMTP_HOST:", process.env.SMTP_HOST);
-      console.log("process.env.SMTP_PORT:", process.env.SMTP_PORT);
-      console.log("process.env.SMTP_USER:", process.env.SMTP_USER);
-      console.log("process.env.SMTP_PASS:", process.env.SMTP_PASS);
-      console.log("process.env.MAIL_FROM:", process.env.MAIL_FROM);
       try {
         await sendEmail({
           to: createdUser.email,
@@ -57,7 +52,7 @@ export async function signup(req, res) {
               <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
                 ${verificationToken}
               </div>
-              <p>This code will expire in 24 hours.</p>
+              <p>This code will expire in 15 minutes.</p>
               <p>If you didn't create an account, please ignore this email.</p>
             </div>
           `,
