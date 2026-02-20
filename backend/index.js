@@ -1,11 +1,13 @@
 import dotenv from "dotenv";
+
+// Load environment variables FIRST before importing other modules
+dotenv.config();
+
 import express from "express";
 import { connectToDatabase } from "./database/connect-to-database.js";
 import authRoutes from './routes/auth-routes.js'
 
 const app = express();
-
-dotenv.config();
 
 const PORT = process.env.PORT;
 
