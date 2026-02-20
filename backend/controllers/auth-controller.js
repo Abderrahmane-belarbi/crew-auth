@@ -57,9 +57,9 @@ export async function signup(req, res) {
             </div>
           `,
         });
-        console.log("✅ Verification email sent to:", createdUser.email);
+        console.log("Verification email sent to:", createdUser.email);
       } catch (emailError) {
-        console.error("❌ Failed to send verification email:", emailError);
+        console.error("Failed to send verification email:", emailError);
       }
 
       return res.status(201).json({
@@ -67,7 +67,7 @@ export async function signup(req, res) {
         message: "User created successfully",
         data: {
           // createdUser is a Mongoose Document, not a plain JavaScript object. save(), populate(), toObject(), toJSON()
-          // but createdUser._doc is the user data that we need
+          // createdUser._doc is the user data that we need
           ...createdUser._doc,
           password: undefined,
         },
@@ -80,10 +80,78 @@ export async function signup(req, res) {
   }
 }
 
-export function login(req, res) {
-  res.send("Login Page");
+export async function login(req, res) {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ok: false, message: "Email and password are required", data: {}});
+    
+    // we put Invalid credentials for both email and password for security reasons
+    const user = await User.findOne({email});
+    if(!user) return res.status(400).json({ok: false, message: "Invalid credentials", data: {}});
+ 
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if(!passwordMatch) return res.status(400).json({ok: false, message: "Invalid credentials", data: {}});
+
+    // jwt
+    generateTokenSetCookie(res, user._id);
+    user.lastLogin = new Date();
+    await user.save();
+
+    return res.status(200).json({ok: true, message: "User Logged in successfully", data: {
+      ...user._doc,
+      password: undefined
+    }});
+  
+  } catch (error) {
+    return res.status(500).json({ok: false, message: error.message, data: {}});
+  }
 }
 
 export function logout(req, res) {
-  res.send("Logout Page");
+  res.clearCookie("token");
+  res.status(200).json({ ok: true, message: "Logged out successfully", data: {} });
+}
+
+export async function verificationEmail(req, res) {
+  try {
+    const { verificationToken } = req.body;
+
+    if(!verificationToken) 
+      return res.status(500).json({ ok: false, message: "Required fields are missing", data: {} });
+    
+    const user = await User.findOne({ verificationToken });
+    if (!user)
+      return res.status(400).json({ ok: false, message: "User not found", data: {} });
+
+    if (!user.verificationToken || !user.verificationTokenExpiresAt) {
+      return res.status(400).json({ ok: false, message: "No active verification token", data: {} });
+    }
+
+    if (Date.now() > new Date(user.verificationTokenExpiresAt).getTime()) {
+      return res.status(400).json({ ok: false, message: "Token expired", data: {} });
+    }
+
+    if (String(user.verificationToken) !== String(verificationToken).trim()) {
+      return res.status(400).json({ ok: false, message: "Wrong token", data: {} });
+    }
+
+    user.isVerified = true;
+    user.verificationTokenExpiresAt = undefined;
+    user.verificationToken = undefined;
+
+    await user.save();
+
+    return res.status(200).json({
+      ok: true,
+      message: "The email has been verified successfully",
+      data: {
+        ...user._doc,
+        password: undefined,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, message: error.message, data: {} });
+  }
 }
