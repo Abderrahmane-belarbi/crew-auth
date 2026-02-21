@@ -4,22 +4,26 @@
   --foreground: #e6e6fa;
   --muted-foreground: #a0a0c0;
   --primary: #4f46e5;
+  --primary-foreground: #ffffff;
   --secondary: #06b6d4;
   --accent: #06b6d4;
   --card: rgba(30, 20, 60, 0.4);
   --muted: rgba(79, 70, 229, 0.1);
   --border: rgba(79, 70, 229, 0.2);
+  --input: rgba(20, 13, 41, 0.5);
 }
 
 @theme inline {
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-card: var(--card);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-input: var(--input);
 }
 
 

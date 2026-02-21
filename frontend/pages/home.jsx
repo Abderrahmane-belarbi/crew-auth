@@ -5,12 +5,12 @@ import GradientButton from "../components/gradient-button";
 
 export default function Home() {
   return (
-    <div className="w-full max-w-3xl py-12 px-4">
+    <div className="w-full max-w-2xl py-12 px-4">
       <div className="space-y-10 text-center">
         {/* HERO SECTION */}
         <div className="space-y-4">
           <h1 className="text-foreground text-5xl font-bold text-balance">
-            MERN Authentication System
+            MERN Auth System
           </h1>
           <p className="text-muted-foreground text-lg text-balance">
             Full-stack authentication system built with MongoDB, Express, React,
@@ -55,7 +55,7 @@ export default function Home() {
             </Link>
 
             <Link
-              to="/signup"
+              to="/register"
               className="w-full h-11 rounded-lg border border-border/40 bg-muted/30 hover:bg-muted/70 text-foreground transition-colors font-medium flex items-center justify-center gap-2"
             >
               <span>Create Account</span>
