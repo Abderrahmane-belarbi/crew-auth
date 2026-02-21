@@ -1,9 +1,33 @@
 @import "tailwindcss";
 
+:root {
+  --foreground: #e6e6fa;
+  --muted-foreground: #a0a0c0;
+  --primary: #4f46e5;
+  --secondary: #06b6d4;
+  --accent: #06b6d4;
+  --card: rgba(30, 20, 60, 0.4);
+  --muted: rgba(79, 70, 229, 0.1);
+  --border: rgba(79, 70, 229, 0.2);
+}
+
+@theme inline {
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+}
+
+
+
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(13px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
