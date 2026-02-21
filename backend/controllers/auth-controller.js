@@ -22,7 +22,7 @@ export async function signup(req, res) {
   try {
     const { email, password, name } = req.body;
     if (!email || !password || !name) {
-      return res.status(500).json({
+      return res.status(400).json({
         ok: false,
         message: "Email, password and name are required",
         data: {},
@@ -32,7 +32,7 @@ export async function signup(req, res) {
     const exist = await User.findOne({ email });
     if (exist)
       return res
-        .status(500)
+        .status(409)
         .json({ ok: false, message: "Email already exist", data: {} });
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -130,7 +130,7 @@ export async function verificationEmail(req, res) {
     const { verificationToken } = req.body;
 
     if(!verificationToken) 
-      return res.status(500).json({ ok: false, message: "Required fields are missing", data: {} });
+      return res.status(400).json({ ok: false, message: "Required fields are missing", data: {} });
     
     const user = await User.findOne({ verificationToken });
     if (!user)
@@ -181,8 +181,10 @@ export async function forgotPassword(req, res) {
     user.resetPasswordExpiresAt = Date.now() + 10 * 60 * 1000 // expires in 10 min
     await user.save();
 
-    // Send email to user
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${hashedToken}`;
+    // Send email to user resetPasswordToken not the hashed
+    // Send the raw token to the user in the link
+    // When user comes back with raw token, you hash it and compare to DB
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetPasswordToken}`;
     await sendEmail({
       to: user.email,
       subject: "Reset your password",
@@ -221,9 +223,9 @@ export async function forgotPassword(req, res) {
       `,
     });
 
-    return res.status(200).json({ ok: true, message: "If that email exists, we sent a reset link.", data: {} })
+    return res.status(200).json({ ok: true, message: "Password reset link sent to your email", data: {} })
   } catch (error) {
-    return res.status(200).json({ ok: false, message: error.message, data: {} })
+    return res.status(500).json({ ok: false, message: error.message, data: {} })
   }
 }
 
@@ -234,8 +236,10 @@ export async function resetPassword(req, res) {
     if(!password) return res.status(400).json({ok: false, message: "Password required", data: {}});
     if(!token) return res.status(400).json({ok: false, message: "Token required", data: {}});
     
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
     const user = await User.findOne({
-      resetPasswordToken: token,
+      resetPasswordToken: hashedToken,
       resetPasswordExpiresAt: {
         $gt: Date.now() // find the user if thier token not expires by check gt: grater than
       }
@@ -249,7 +253,7 @@ export async function resetPassword(req, res) {
     user.resetPasswordExpiresAt = undefined
     await user.save();
 
-    return res.status(200).json({ok: true, message: "Password reset successfully", data: {token}});
+    return res.status(200).json({ok: true, message: "Password reset successfully", data: {}});
   } catch (error) {
     return res.status(500).json({ok: false, message: error.message, data: {}})
   }
