@@ -1,9 +1,17 @@
-function App() {
-  return (
-    <div className='w-full h-dvh flex items-center justify-center bg-gray-200'>
-      <h1>Hello World</h1>
-    </div>
-  )
-}
+import AnimatedBackground from "../components/animated-background.jsx";
+import { Routes, Route } from "react-router-dom";
+import Home from "../pages/home.jsx";
+import Login from "../pages/login.jsx";
+import Register from "../pages/register.jsx";
 
-export default App
+export default function App() {
+  return (
+    <AnimatedBackground>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </AnimatedBackground>
+  );
+}
