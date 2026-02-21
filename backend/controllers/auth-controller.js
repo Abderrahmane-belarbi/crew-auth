@@ -8,6 +8,16 @@ import {
 import { generateTokenSetCookie } from "../utils/generate-token-cookie.js";
 import { sendEmail } from "../utils/send-email.js";
 
+export async function checkAuth(req, res) {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+    if (!user) return res.status(404).json({  ok: false, message: "User not found", data: {},});
+   return res.status(200).json({ ok: true, message: "User found", data: user });
+  } catch (error) {
+    return res.status(500).json({ok: false, message: error.message, data: {}});
+  }
+}
+
 export async function signup(req, res) {
   try {
     const { email, password, name } = req.body;
