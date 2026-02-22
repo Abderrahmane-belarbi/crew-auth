@@ -4,6 +4,7 @@ import InputField from "../components/shared/input-field";
 import { useState } from "react";
 import GradientButton from "../components/gradient-button";
 import { Link } from "react-router-dom";
+import PasswordStrengthChecker from "../components/password-strength-checker";
 
 export default function Register() {
   const [input, setInput] = useState({
@@ -22,7 +23,7 @@ export default function Register() {
 
   async function handleRegister(e) {
     e.preventDefault();
-    console.log("Register");
+    console.log({input});
   }
 
   return (
@@ -43,7 +44,7 @@ export default function Register() {
           type="email"
           name="email"
           Icon={Mail}
-          placeholder="you@email.com"
+          placeholder="example@email.com"
           value={input.email}
           onChange={handleInputChange}
           autoComplete="email"
@@ -69,6 +70,7 @@ export default function Register() {
           autoComplete="new-password"
           required
         />
+        <PasswordStrengthChecker password={input.password} />
         <GradientButton>Create Account</GradientButton>
       </form>
       <div className="mt-6 text-center text-sm">
@@ -76,6 +78,7 @@ export default function Register() {
         <Link
           to="/login"
           className="font-semibold text-primary hover:text-secondary transition-colors"
+          type="submit"
         >
           Sign in
         </Link>

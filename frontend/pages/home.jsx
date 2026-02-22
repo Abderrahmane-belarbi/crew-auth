@@ -5,7 +5,7 @@ import GradientButton from "../components/gradient-button";
 
 export default function Home() {
   return (
-    <div className="w-full max-w-2xl py-12 px-4">
+    <div className="w-full max-w-2xl py-12 px-4 animate-[fade-in_0.5s_ease-out_forwards]">
       <div className="space-y-10 text-center">
         {/* HERO SECTION */}
         <div className="space-y-4">

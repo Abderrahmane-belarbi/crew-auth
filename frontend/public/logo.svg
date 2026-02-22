@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Auth logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="256" y2="256">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bigger shield (reduced padding) -->
+  <path
+    d="M128 12
+       C78 12 32 36 32 36
+       v82
+       c0 80 60 118 96 132
+       c36-14 96-52 96-132
+       V36
+       s-46-24-96-24z"
+    fill="url(#g)"
+  />
+
+  <!-- Thicker bolt -->
+  <path
+    d="M150 60
+       L96 140
+       h36
+       l-20 70
+       56-84
+       h-38
+       z"
+    fill="#0B1020"
+  />
+</svg>

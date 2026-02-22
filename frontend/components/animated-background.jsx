@@ -60,7 +60,7 @@ export default function AnimatedBackground({ children, className = "" }) {
       </div>
 
       {/* Foreground content */}
-      <div className="relative z-10 min-h-dvh flex items-center justify-center animate-[fade-in_0.5s_ease-out_forwards]">{children}</div>
+      <div className="relative z-10 min-h-dvh flex items-center justify-center">{children}</div>
     </div>
   );
 }
