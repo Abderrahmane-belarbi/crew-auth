@@ -23,7 +23,7 @@ export default function Register() {
 
   async function handleRegister(e) {
     e.preventDefault();
-    console.log({input});
+    console.log({ input });
   }
 
   return (
@@ -73,14 +73,24 @@ export default function Register() {
         <PasswordStrengthChecker password={input.password} />
         <GradientButton>Create Account</GradientButton>
       </form>
-      <div className="mt-6 text-center text-sm">
-        <span className="text-muted-foreground">Already have an account?</span>{" "}
+      <div className="mt-6 space-y-4 text-center text-sm">
+        <div className="text-center text-sm">
+          <span className="text-muted-foreground">
+            Already have an account?
+          </span>{" "}
+          <Link
+            to="/login"
+            className="font-semibold text-primary hover:text-secondary transition-colors"
+            type="submit"
+          >
+            Sign in
+          </Link>
+        </div>
         <Link
-          to="/login"
-          className="font-semibold text-primary hover:text-secondary transition-colors"
-          type="submit"
+          to="/"
+          className="block text-muted-foreground hover:text-primary transition-colors"
         >
-          Sign in
+          Back to home
         </Link>
       </div>
     </AuthCard>

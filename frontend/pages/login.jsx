@@ -65,6 +65,12 @@ export default function Login() {
             Sign up
           </Link>
         </div>
+        <Link
+          to="/"
+          className="block text-muted-foreground hover:text-primary transition-colors"
+        >
+          Back to home
+        </Link>
       </div>
     </AuthCard>
   );
