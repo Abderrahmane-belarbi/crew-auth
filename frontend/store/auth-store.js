@@ -15,14 +15,14 @@ export const useAuth = create((set) => ({
   signup: async(email, password, name) => {
     set({isLoading: true, error: null});
     try {
-      const response = await axios.post(`${API_URL}/signup`, {email, password, name});
-      if(response.ok) {
-        set({user: response.data.user, isAuthenticated: true, isLoading: false})
-      } else {
-        set({error: response.data.message || "Error signing up", isLoading: false, message: response.data.message})
-      }
+      const res = await axios.post(`${API_URL}/signup`, {email, password, name});
+      console.log('response from auth store', res);
+      set({user: res.data.data.user, isAuthenticated: true, isLoading: false, message: res.data.message})
     } catch (error) {
-      set({error: error.message || "Error signing up", isLoading: false, message: response.data.message})
+      console.log('error response from auth store', res);
+      set({error: error.message || "Error signing up", isLoading: false, message: res.data.message})
+    } finally {
+      set({isLoading: false})
     }
   }
 }))

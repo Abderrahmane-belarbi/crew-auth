@@ -29,11 +29,7 @@ export default function Register() {
     try {
       await signup(input.email, input.password, input.name);
     } catch (error) {
-      
-    } finally {
-      setTimeout(() => {
-        
-      }, 5000)
+      console.log(error);
     }
   }
 
@@ -82,6 +78,8 @@ export default function Register() {
           required
         />
         <PasswordStrengthChecker password={input.password} />
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {message && <p className="text-green-500 text-sm">{message}</p>}
         <GradientButton isLoading={isLoading} onClick={handleRegister} type="submit">Create Account</GradientButton>
       </form>
       <div className="mt-6 space-y-4 text-center text-sm">

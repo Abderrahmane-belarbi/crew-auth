@@ -30,10 +30,12 @@ export async function signup(req, res) {
     }
 
     const exist = await User.findOne({ email });
-    if (exist)
-      return res
-        .status(409)
-        .json({ ok: false, message: "Email already exist", data: {} });
+    if (exist) {
+      console.log("exist");
+      return res.status(409).json({ ok: false, message: "Email already exist", data: {} });
+    }
+
+    console.log("do not exist");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = generateVerifcationToken();
