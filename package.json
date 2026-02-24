@@ -1,5 +1,5 @@
 {
-  "name": "authentication-system",
+  "name": "crewauth",
   "version": "1.0.0",
   "description": "A Full MERN Stack Authentication System",
   "main": "./backend/index.js",
