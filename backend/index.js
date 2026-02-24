@@ -3,10 +3,13 @@ import express from "express";
 import { connectToDatabase } from "./database/connect-to-database.js";
 import authRoutes from "./routes/auth-routes.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 
 const PORT = process.env.PORT || 5000;
+
+app.use(cors({origin: "http://localhost:3000", credentials: true})); // to allow cross-origin requests
 
 // Express middleware that parses incoming JSON request bodies.
 app.use(express.json()); // to parse incoming requests with JSON payloads (req.body)

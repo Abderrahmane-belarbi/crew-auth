@@ -5,6 +5,7 @@ import { useState } from "react";
 import GradientButton from "../components/gradient-button";
 import { Link } from "react-router-dom";
 import PasswordStrengthChecker from "../components/password-strength-checker";
+import { useAuth } from "../store/auth-store";
 
 export default function Register() {
   const [input, setInput] = useState({
@@ -13,6 +14,8 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
+
+  const { signup, message, isLoading, error } = useAuth();
 
   function handleInputChange(e) {
     const { name, value } = e.target;
@@ -23,7 +26,15 @@ export default function Register() {
 
   async function handleRegister(e) {
     e.preventDefault();
-    console.log({ input });
+    try {
+      await signup(input.email, input.password, input.name);
+    } catch (error) {
+      
+    } finally {
+      setTimeout(() => {
+        
+      }, 5000)
+    }
   }
 
   return (
@@ -71,7 +82,7 @@ export default function Register() {
           required
         />
         <PasswordStrengthChecker password={input.password} />
-        <GradientButton>Create Account</GradientButton>
+        <GradientButton isLoading={isLoading} onClick={handleRegister} type="submit">Create Account</GradientButton>
       </form>
       <div className="mt-6 space-y-4 text-center text-sm">
         <div className="text-center text-sm">
