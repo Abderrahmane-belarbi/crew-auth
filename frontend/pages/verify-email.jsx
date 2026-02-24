@@ -97,10 +97,10 @@ export default function VerifyEmail() {
           </button>
         </p>
         <Link
-          to="/login"
+          to="/"
           className="block text-muted-foreground hover:text-primary transition-colors"
         >
-          Back to login
+          Back to home
         </Link>
       </div>
     </AuthCard>

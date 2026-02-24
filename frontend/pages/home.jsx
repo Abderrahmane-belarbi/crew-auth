@@ -9,14 +9,11 @@ export default function Home() {
       <div className="space-y-10 text-center">
         {/* HERO SECTION */}
         <div className="space-y-4">
-          <h1 className="text-foreground text-5xl font-bold text-balance">
-            MERN Auth System
+          <h1 className="text-foreground text-5xl font-bold">
+            CrewAuth Core
           </h1>
-          <p className="text-muted-foreground text-lg text-balance">
-            Full-stack authentication system built with MongoDB, Express, React,
-            and Node.js. Implements secure JWT-based authentication, email
-            verification, password reset, and protected routes with a modern
-            dark UI.
+          <p className="text-muted-foreground text-lg">
+            A production-ready authentication system with JWT cookies, email verification, password reset, protected routes — built on the MERN stack.
           </p>
         </div>
         {/* FEATURE GRID SECTION */}
