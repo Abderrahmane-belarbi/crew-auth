@@ -130,7 +130,7 @@ export async function verificationEmail(req, res) {
     
     const user = await User.findOne({ verificationToken: code });
     if (!user)
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ message: "Invalid token" });
 
     if (!user.verificationToken || !user.verificationTokenExpiresAt) {
       return res.status(400).json({ message: "No active verification token" });
@@ -138,10 +138,6 @@ export async function verificationEmail(req, res) {
 
     if (Date.now() > new Date(user.verificationTokenExpiresAt).getTime()) {
       return res.status(400).json({ message: "Token expired" });
-    }
-
-    if (String(user.verificationToken) !== String(code).trim()) {
-      return res.status(400).json({ message: "Wrong token" });
     }
 
     user.isVerified = true;
@@ -153,10 +149,10 @@ export async function verificationEmail(req, res) {
     return res.status(200).json({
       message: "The email has been verified successfully",
       user: {
-        _id: createdUser._id,
-        name: createdUser.name,
-        email: createdUser.email,
-        isVerified: createdUser.isVerified,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
       },
     });
   } catch (error) {

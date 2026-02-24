@@ -18,7 +18,7 @@ export default function OTPCodeInput({onChange, onComplete}) {
         const focusIndex = nextEmpty === -1 ? 5 : nextEmpty; // it will be -1 if all slots are filled
         inputRefs.current[focusIndex]?.focus();
         if (newCode.every((c) => c !== "")) {
-          onComplete?.(code);
+          onComplete?.(newCode.join(''));
         }
         return;
       }
@@ -31,7 +31,7 @@ export default function OTPCodeInput({onChange, onComplete}) {
         inputRefs.current[index + 1]?.focus();
       }
       if (newCode.every((c) => c !== "")) {
-        onComplete?.(code);
+        onComplete?.(newCode.join(''));
       }
     }
   

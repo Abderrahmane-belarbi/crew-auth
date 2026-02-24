@@ -13,7 +13,7 @@ export const useAuth = create((set) => ({
   message: null,
 
   signup: async (email, password, name) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, message: null });
     try {
       const res = await fetch(`${API_URL}/signup`, {
         method: "POST",
@@ -47,7 +47,7 @@ export const useAuth = create((set) => ({
     }
   },
   verifyEmail: async (code) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, message: null });
     try {
       const res = await fetch(`${API_URL}/verify-email`, {
         method: "POST",
@@ -58,7 +58,7 @@ export const useAuth = create((set) => ({
       });
       const data = await res.json();
       if(res.ok) {
-        set({  isAuthenticated: true });
+        set({  isAuthenticated: true, message: data.message });
       } else {
         set({ error: data.message, isAuthenticated: false });
         throw new Error(data.message);

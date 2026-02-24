@@ -12,20 +12,30 @@ export default function VerifyEmail() {
 
   function handleCodeChange(code) {
     setCode(code);
-    verifyEmail(code);
   }
 
-  function handleCodeComplete(completedCode) {
-    //setIsLoading(true);
-    setTimeout(() => {
-      //setIsLoading(false);
-    }, 2000);
+  async function handleCodeComplete(completedCode) {
+    setCode(completedCode);
+    try {
+      await verifyEmail(completedCode);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 3000);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    //setIsLoading(true);
-    verifyEmail(code);
+    try {
+      await verifyEmail(code);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 3000);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -36,13 +46,20 @@ export default function VerifyEmail() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <p
-            className="text-red-500 text-sm"
+            className="text-red-500 text-sm text-center"
             role="alert"
           >
             {error}
           </p>
         )}
-        {/*success && <AlertMessage type="success" message={success} />*/}
+        {!error && message && (
+          <p
+            className="text-green-500 text-sm text-center"
+            role="alert"
+          >
+            {message}
+          </p>
+        )}
 
         <div>
           <label className="sr-only">Verification Code</label>
@@ -56,7 +73,7 @@ export default function VerifyEmail() {
         </div>
 
         {code.length === 6 && (
-          <GradientButton type="submit" isLoading={isLoading}>
+          <GradientButton type="submit" isLoading={isLoading} disabled={!error && message}>
             Verify Email
           </GradientButton>
         )}
