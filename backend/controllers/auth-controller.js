@@ -23,19 +23,14 @@ export async function signup(req, res) {
     const { email, password, name } = req.body;
     if (!email || !password || !name) {
       return res.status(400).json({
-        ok: false,
         message: "Email, password and name are required",
-        data: {},
       });
     }
 
     const exist = await User.findOne({ email });
     if (exist) {
-      console.log("exist");
-      return res.status(409).json({ ok: false, message: "Email already exist", data: {} });
+      return res.status(409).json({ message: "Email already exist"});
     }
-
-    console.log("do not exist");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = generateVerifcationToken();
@@ -71,26 +66,26 @@ export async function signup(req, res) {
             </div>
           `,
         });
-        console.log("Verification email sent to:", createdUser.email);
       } catch (emailError) {
         console.error("Failed to send verification email:", emailError);
       }
 
       return res.status(201).json({
-        ok: true,
         message: "User created successfully",
-        data: {
+        user: {
           // createdUser is a Mongoose Document, not a plain JavaScript object. save(), populate(), toObject(), toJSON()
           // createdUser._doc is the user data that we need
-          ...createdUser._doc,
-          password: undefined,
-        },
+          _id: createdUser._id,
+          name: createdUser.name,
+          email: createdUser.email,
+          isVerified: createdUser.isVerified,
+        }
       });
     }
   } catch (error) {
     return res
-      .status(400)
-      .json({ ok: false, message: error.message, data: {} });
+      .status(500)
+      .json({ message: error.message });
   }
 }
 
@@ -129,25 +124,24 @@ export function logout(req, res) {
 
 export async function verificationEmail(req, res) {
   try {
-    const { verificationToken } = req.body;
-
-    if(!verificationToken) 
-      return res.status(400).json({ ok: false, message: "Required fields are missing", data: {} });
+    const { code } = req.body;
+    console.log("CODE:", code);
+    if(!code) return res.status(400).json({ message: "Required fields are missing" });
     
-    const user = await User.findOne({ verificationToken });
+    const user = await User.findOne({ verificationToken: code });
     if (!user)
-      return res.status(400).json({ ok: false, message: "User not found", data: {} });
+      return res.status(400).json({ message: "User not found" });
 
     if (!user.verificationToken || !user.verificationTokenExpiresAt) {
-      return res.status(400).json({ ok: false, message: "No active verification token", data: {} });
+      return res.status(400).json({ message: "No active verification token" });
     }
 
     if (Date.now() > new Date(user.verificationTokenExpiresAt).getTime()) {
-      return res.status(400).json({ ok: false, message: "Token expired", data: {} });
+      return res.status(400).json({ message: "Token expired" });
     }
 
-    if (String(user.verificationToken) !== String(verificationToken).trim()) {
-      return res.status(400).json({ ok: false, message: "Wrong token", data: {} });
+    if (String(user.verificationToken) !== String(code).trim()) {
+      return res.status(400).json({ message: "Wrong token" });
     }
 
     user.isVerified = true;
@@ -157,15 +151,16 @@ export async function verificationEmail(req, res) {
     await user.save();
 
     return res.status(200).json({
-      ok: true,
       message: "The email has been verified successfully",
-      data: {
-        ...user._doc,
-        password: undefined,
+      user: {
+        _id: createdUser._id,
+        name: createdUser.name,
+        email: createdUser.email,
+        isVerified: createdUser.isVerified,
       },
     });
   } catch (error) {
-    return res.status(500).json({ ok: false, message: error.message, data: {} });
+    return res.status(500).json({ message: error.message });
   }
 }
 

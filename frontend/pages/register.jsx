@@ -3,7 +3,7 @@ import { AuthCard } from "../components/auth/auth-card";
 import InputField from "../components/shared/input-field";
 import { useState } from "react";
 import GradientButton from "../components/gradient-button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthChecker from "../components/password-strength-checker";
 import { useAuth } from "../store/auth-store";
 
@@ -16,6 +16,7 @@ export default function Register() {
   });
 
   const { signup, message, isLoading, error } = useAuth();
+  const navigate = useNavigate();
 
   function handleInputChange(e) {
     const { name, value } = e.target;
@@ -28,6 +29,7 @@ export default function Register() {
     e.preventDefault();
     try {
       await signup(input.email, input.password, input.name);
+      navigate("/verify-email");
     } catch (error) {
       console.log(error);
     }
@@ -77,10 +79,23 @@ export default function Register() {
           autoComplete="new-password"
           required
         />
+        {error && (
+          <p
+            className="text-red-500 text-sm"
+            role="alert"
+          >
+            {error}
+          </p>
+        )}
         <PasswordStrengthChecker password={input.password} />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        {message && <p className="text-green-500 text-sm">{message}</p>}
-        <GradientButton isLoading={isLoading} onClick={handleRegister} type="submit">Create Account</GradientButton>
+
+        <GradientButton
+          isLoading={isLoading}
+          onClick={handleRegister}
+          type="submit"
+        >
+          Create Account
+        </GradientButton>
       </form>
       <div className="mt-6 space-y-4 text-center text-sm">
         <div className="text-center text-sm">

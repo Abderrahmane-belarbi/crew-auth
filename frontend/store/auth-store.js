@@ -12,17 +12,63 @@ export const useAuth = create((set) => ({
   isCheckingAuth: true,
   message: null,
 
-  signup: async(email, password, name) => {
-    set({isLoading: true, error: null});
+  signup: async (email, password, name) => {
+    set({ isLoading: true, error: null });
     try {
-      const res = await axios.post(`${API_URL}/signup`, {email, password, name});
-      console.log('response from auth store', res);
-      set({user: res.data.data.user, isAuthenticated: true, isLoading: false, message: res.data.message})
+      const res = await fetch(`${API_URL}/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password, name }),
+      });
+      const data = await res.json();
+      if(res.ok) {
+        set({
+          user: data.user,
+          isAuthenticated: true,
+          message: data.message,
+        });
+      } else {
+        const errorMessage = data?.message || "Error signing up";
+        set({
+          error: errorMessage,
+        });
+        // for the frontend error to skip navigation to verify email
+        throw new Error(errorMessage);
+      }
     } catch (error) {
-      console.log('error response from auth store', res);
-      set({error: error.message || "Error signing up", isLoading: false, message: res.data.message})
+      const errorMessage = error.message || "Error signing up";
+      set({ error: errorMessage })
+      // for the frontend error to skip navigation to verify email
+        throw new Error(errorMessage);
     } finally {
-      set({isLoading: false})
+      set({ isLoading: false });
+    }
+  },
+  verifyEmail: async (code) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await fetch(`${API_URL}/verify-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if(res.ok) {
+        set({  isAuthenticated: true });
+      } else {
+        set({ error: data.message, isAuthenticated: false });
+        throw new Error(data.message);
+      }
+      return data
+    } catch (error) {
+        set({ error: error.message, isAuthenticated: false });
+        throw new Error(error.message);
+    } finally {
+      set({ isLoading: false })
     }
   }
-}))
+}));

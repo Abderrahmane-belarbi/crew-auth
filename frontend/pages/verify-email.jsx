@@ -3,29 +3,29 @@ import { AuthCard } from "../components/auth/auth-card";
 import GradientButton from "../components/gradient-button";
 import { Link, useNavigate } from "react-router-dom";
 import OTPCodeInput from "../components/otp-code-input";
+import { useAuth } from "../store/auth-store";
 
 export default function VerifyEmail() {
   const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, verifyEmail, message, error } = useAuth()
   const navigate = useNavigate();
 
   function handleCodeChange(code) {
     setCode(code);
+    verifyEmail(code);
   }
 
   function handleCodeComplete(completedCode) {
-    setIsLoading(true);
+    //setIsLoading(true);
     setTimeout(() => {
-      setIsLoading(false);
+      //setIsLoading(false);
     }, 2000);
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    //setIsLoading(true);
+    verifyEmail(code);
   }
 
   return (
@@ -34,7 +34,14 @@ export default function VerifyEmail() {
       subtitle="Enter the 6-digit code sent to your email"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/*error && <AlertMessage type="error" message={error} />*/}
+        {error && (
+          <p
+            className="text-red-500 text-sm"
+            role="alert"
+          >
+            {error}
+          </p>
+        )}
         {/*success && <AlertMessage type="success" message={success} />*/}
 
         <div>
