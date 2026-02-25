@@ -49,7 +49,7 @@ export const useAuth = create((set) => ({
       set({ isLoading: false });
     }
   },
-  resendVerificationEmail: async (email) => {
+  resendVerificationEmail: async (email, resetCooldown) => {
     set({ isLoading: true, error: null, message: null });
     try {
       if(!email) {
@@ -62,7 +62,7 @@ export const useAuth = create((set) => ({
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, resetCooldown }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -99,7 +99,10 @@ export const useAuth = create((set) => ({
       const data = await res.json();
       if(res.ok) {
         set({  isAuthenticated: true, message: data.message });
-      } else {
+      } else if (res.status === 410) {
+        set({ isAuthenticated: true, message: data.message, error: null });
+      }
+      else {
         set({ error: data.message, isAuthenticated: false });
         throw new Error(data.message);
       }

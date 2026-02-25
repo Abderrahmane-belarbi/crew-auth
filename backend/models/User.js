@@ -25,7 +25,8 @@ const UserSchema = new Schema({
   resetPasswordToken: String,
   resetPasswordExpiresAt: Date,
   verificationToken: String,
-  verificationTokenExpiresAt: Date
+  verificationTokenExpiresAt: Date,
+  verificationResendAvailableAt: Date,
 }, { timestamps: true })
 
 const User = model("User", UserSchema);
