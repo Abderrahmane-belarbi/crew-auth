@@ -165,7 +165,9 @@ export async function resendVerificationEmail(req, res) {
       );
     }
 
-    if(remainingSeconds > 0) res.status(400).json({ message: `You can request a new verification code in ${remainingSeconds} second${remainingSeconds > 1 ? 's' : ''}.` }); 
+    if(remainingSeconds > 0) {
+      return res.status(400).json({ message: `You can request a new verification code in ${remainingSeconds} second${remainingSeconds > 1 ? 's' : ''}.` });
+    }
 
     const verificationToken = generateVerifcationToken();
     const verificationTokenExpiresAt = generateVerificationTokenExpiresAt();
@@ -175,7 +177,7 @@ export async function resendVerificationEmail(req, res) {
     user.verificationResendAvailableAt = new Date(Date.now() + resetCooldown * 1000);
     await user.save();
 
-    /*await sendEmail({
+    await sendEmail({
       to: user.email,
       subject: "Verify your email",
       text: `Your verification code is ${verificationToken}`,
@@ -189,7 +191,7 @@ export async function resendVerificationEmail(req, res) {
           <p>This code will expire in 15 minutes.</p>
         </div>
       `,
-    });*/
+    });
     return res
       .status(200)
       .json({ message: "Verification code resent successfully" });

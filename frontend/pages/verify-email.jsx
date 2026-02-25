@@ -90,7 +90,7 @@ export default function VerifyEmail() {
   }
 
   async function handleResend() {
-    //if (cooldownSecondsLeft > 0) return;
+    if (cooldownSecondsLeft > 0) return;
 
     try {
       await resendVerificationEmail(email, RESEND_COOLDOWN_SECONDS);
@@ -144,7 +144,7 @@ export default function VerifyEmail() {
           Didn&apos;t receive the code?{" "}
           <button
             onClick={handleResend}
-            disabled={isLoading }
+            disabled={isLoading || cooldownSecondsLeft > 0}
             className="text-primary hover:text-secondary transition-colors cursor-pointer disabled:cursor-default disabled:text-muted-foreground disabled:opacity-50"
           >
             {cooldownSecondsLeft > 0
