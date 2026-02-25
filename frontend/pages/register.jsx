@@ -29,7 +29,7 @@ export default function Register() {
     e.preventDefault();
     try {
       await signup(input.email, input.password, input.name);
-      navigate("/verify-email");
+      navigate("/verify-email", { state: { email: input.email }});
     } catch (error) {
       console.log(error);
     }

@@ -71,7 +71,7 @@ export async function signup(req, res) {
       }
 
       return res.status(201).json({
-        message: "User created successfully",
+        message: "User created successfully, Please verify your email.",
         user: {
           // createdUser is a Mongoose Document, not a plain JavaScript object. save(), populate(), toObject(), toJSON()
           // createdUser._doc is the user data that we need
@@ -92,28 +92,30 @@ export async function signup(req, res) {
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ok: false, message: "Email and password are required", data: {}});
-    
+    if (!email || !password) return res.status(400).json({ message: "Email and password are required" });
+
     // we put Invalid credentials for both email and password for security reasons
     const user = await User.findOne({email});
-    if(!user) return res.status(400).json({ok: false, message: "Invalid credentials", data: {}});
- 
+    if(!user) return res.status(400).json({ message: "Invalid credentials" });
+    
+    if (!user.isVerified) return res.status(403).json({ message: "Please verify your email before logging in" });
+    
     const passwordMatch = await bcrypt.compare(password, user.password);
 
-    if(!passwordMatch) return res.status(400).json({ok: false, message: "Invalid credentials", data: {}});
+    if(!passwordMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     // jwt
     generateTokenSetCookie(res, user._id);
     user.lastLogin = new Date();
     await user.save();
 
-    return res.status(200).json({ok: true, message: "User Logged in successfully", data: {
+    return res.status(200).json({ message: "User Logged in successfully", data: {
       ...user._doc,
       password: undefined
     }});
   
   } catch (error) {
-    return res.status(500).json({ok: false, message: error.message, data: {}});
+    return res.status(500).json({ message: error.message });
   }
 }
 
@@ -122,11 +124,53 @@ export function logout(req, res) {
   res.status(200).json({ ok: true, message: "Logged out successfully", data: {} });
 }
 
+export async function resendVerificationEmail(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email is already verified" });
+    }
+
+    const verificationToken = generateVerifcationToken();
+    const verificationTokenExpiresAt = generateVerificationTokenExpiresAt();
+
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpiresAt = verificationTokenExpiresAt;
+    await user.save();
+
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your email",
+      text: `Your verification code is ${verificationToken}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Email Verification</h2>
+          <p>Use the verification code below to verify your email address:</p>
+          <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
+            ${verificationToken}
+          </div>
+          <p>This code will expire in 15 minutes.</p>
+        </div>
+      `,
+    });
+    return res.status(200).json({ message: "Verification code resent successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
 export async function verificationEmail(req, res) {
   try {
-    const { code } = req.body;
-    console.log("CODE:", code);
-    if(!code) return res.status(400).json({ message: "Required fields are missing" });
+    const { code, email } = req.body;
+    if(!code || !email) return res.status(400).json({ message: "Required fields are missing" });
     
     const user = await User.findOne({ verificationToken: code });
     if (!user)

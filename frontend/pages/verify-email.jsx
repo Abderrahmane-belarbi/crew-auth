@@ -1,26 +1,29 @@
 import { useState } from "react";
 import { AuthCard } from "../components/auth/auth-card";
 import GradientButton from "../components/gradient-button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation} from "react-router-dom";
 import OTPCodeInput from "../components/otp-code-input";
 import { useAuth } from "../store/auth-store";
 
 export default function VerifyEmail() {
   const [code, setCode] = useState("");
-  const { isLoading, verifyEmail, message, error } = useAuth()
+  const { isLoading, verifyEmail, resendVerificationEmail, message, error } = useAuth()
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
 
-  function handleCodeChange(code) {
-    setCode(code);
+
+  function handleCodeChange(codeValue) {
+    setCode(codeValue);
   }
 
   async function handleCodeComplete(completedCode) {
     setCode(completedCode);
     try {
-      await verifyEmail(completedCode);
+      await verifyEmail(completedCode, email);
       setTimeout(() => {
         navigate('/dashboard');
-      }, 3000);
+      }, 5000);
     } catch (error) {
       console.log(error);
     }
@@ -28,15 +31,27 @@ export default function VerifyEmail() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (code.length !== 6) return;
     try {
-      await verifyEmail(code);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 3000);
+      await verifyEmail(code, email);
+      if(!error) {
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 5000);
+      }
     } catch (error) {
       console.log(error);
     }
   }
+
+  async function handleResend() {
+    try {
+      await resendVerificationEmail(email);
+    } catch (resendError) {
+      console.log(resendError);
+    }
+  }
+
 
   return (
     <AuthCard
@@ -55,7 +70,7 @@ export default function VerifyEmail() {
         {!error && message && (
           <p
             className="text-green-500 text-sm text-center"
-            role="alert"
+            role="status"
           >
             {message}
           </p>
@@ -72,27 +87,22 @@ export default function VerifyEmail() {
           </p>
         </div>
 
-        {code.length === 6 && (
-          <GradientButton type="submit" isLoading={isLoading} disabled={!error && message}>
-            Verify Email
-          </GradientButton>
-        )}
+        <GradientButton
+          type="submit"
+          isLoading={isLoading}
+          disabled={code.length !== 6 || (!error && !!message)}
+        >
+          Verify Email
+        </GradientButton>
 
-        {code.length < 6 && (
-          <button
-            type="button"
-            disabled
-            className="h-12 w-full rounded-lg font-semibold bg-muted text-muted-foreground opacity-50"
-          >
-            Enter Code
-          </button>
-        )}
+        
       </form>
 
       <div className="mt-6 space-y-3 text-center text-sm">
         <p className="text-muted-foreground">
-          Didn't receive the code?{" "}
-          <button className="text-primary hover:text-secondary transition-colors cursor-pointer">
+          Didn&apos;t receive the code?{" "}
+          <button onClick={handleResend} disabled={isLoading} className="text-primary hover:text-secondary transition-colors
+          cursor-pointer disabled:cursor-default disabled:text-muted-foreground disabled:opacity-50">
             Resend
           </button>
         </p>

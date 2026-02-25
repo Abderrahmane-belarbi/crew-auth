@@ -46,15 +46,52 @@ export const useAuth = create((set) => ({
       set({ isLoading: false });
     }
   },
-  verifyEmail: async (code) => {
+  resendVerificationEmail: async (email) => {
     set({ isLoading: true, error: null, message: null });
     try {
+      if(!email) {
+        const noEmailError = "No verification request found. Please start the signup process."; 
+        set({ error: noEmailError})
+        throw new Error(noEmailError)
+      };
+      const res = await fetch(`${API_URL}/resend-verification-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        set({ message: data.message });
+      } else {
+        const errorMessage = data?.message || "Unable to resend verification email";
+        set({ error: errorMessage });
+        throw new Error(errorMessage);
+      }
+      return data;
+    } catch (error) {
+      const errorMessage = error.message || "Unable to resend verification email";
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  verifyEmail: async (code, email) => {
+    set({ isLoading: true, error: null, message: null });
+    try {
+      if(!email) {
+        const noEmailError = "No verification request found. Please start the signup process."; 
+        set({ error: noEmailError})
+        throw new Error(noEmailError)
+      };    
       const res = await fetch(`${API_URL}/verify-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, email }),
       });
       const data = await res.json();
       if(res.ok) {
