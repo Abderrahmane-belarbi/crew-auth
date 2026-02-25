@@ -12,6 +12,9 @@ export const useAuth = create((set) => ({
   isCheckingAuth: true,
   message: null,
 
+  clearAuthFeedback: () => {
+    set({ message: null, error: null })
+  },
   signup: async (email, password, name) => {
     set({ isLoading: true, error: null, message: null });
     try {

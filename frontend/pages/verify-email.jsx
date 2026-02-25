@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthCard } from "../components/auth/auth-card";
 import GradientButton from "../components/gradient-button";
 import { Link, useNavigate, useLocation} from "react-router-dom";
@@ -7,11 +7,14 @@ import { useAuth } from "../store/auth-store";
 
 export default function VerifyEmail() {
   const [code, setCode] = useState("");
-  const { isLoading, verifyEmail, resendVerificationEmail, message, error } = useAuth()
+  const { isLoading, verifyEmail, resendVerificationEmail, clearAuthFeedback, message, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
 
+  useEffect(() => {
+    clearAuthFeedback();
+  }, [clearAuthFeedback])
 
   function handleCodeChange(codeValue) {
     setCode(codeValue);
@@ -34,11 +37,9 @@ export default function VerifyEmail() {
     if (code.length !== 6) return;
     try {
       await verifyEmail(code, email);
-      if(!error) {
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 5000);
-      }
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 5000);
     } catch (error) {
       console.log(error);
     }

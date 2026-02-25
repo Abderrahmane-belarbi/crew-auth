@@ -1,7 +1,7 @@
 import { Lock, Mail, User } from "lucide-react";
 import { AuthCard } from "../components/auth/auth-card";
 import InputField from "../components/shared/input-field";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GradientButton from "../components/gradient-button";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthChecker from "../components/password-strength-checker";
@@ -15,8 +15,12 @@ export default function Register() {
     confirmPassword: "",
   });
 
-  const { signup, message, isLoading, error } = useAuth();
+  const { signup, clearAuthFeedback, isLoading, error } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    clearAuthFeedback();
+  }, [clearAuthFeedback]);
 
   function handleInputChange(e) {
     const { name, value } = e.target;

@@ -172,9 +172,11 @@ export async function verificationEmail(req, res) {
     const { code, email } = req.body;
     if(!code || !email) return res.status(400).json({ message: "Required fields are missing" });
     
-    const user = await User.findOne({ verificationToken: code });
+    const user = await User.findOne({ email });
     if (!user)
-      return res.status(400).json({ message: "Invalid token" });
+      return res.status(400).json({ message: "Please Signup first" });
+
+    if(user.isVerified) return res.status(409).json({ message: "Email already verified" });
 
     if (!user.verificationToken || !user.verificationTokenExpiresAt) {
       return res.status(400).json({ message: "No active verification token" });
@@ -183,6 +185,8 @@ export async function verificationEmail(req, res) {
     if (Date.now() > new Date(user.verificationTokenExpiresAt).getTime()) {
       return res.status(400).json({ message: "Token expired" });
     }
+
+    if(String(user.verificationToken) !== String(code)) return res.status(400).json({ message: "Invalid verification code" });
 
     user.isVerified = true;
     user.verificationTokenExpiresAt = undefined;
