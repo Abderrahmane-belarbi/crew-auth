@@ -5,8 +5,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import OTPCodeInput from "../components/otp-code-input";
 import { useAuth } from "../store/auth-store";
 
-const resendCooldownSeconds = import.meta.env.VERIFICATION_RESEND_COOLDOWN_SECONDS || 60;
-const resendCooldownKey = import.meta.env.RESEND_COOLDOWN_KEY || "resendCooldownExpiresAt";
+const resendCooldownSeconds = import.meta.env.VITE_VERIFICATION_RESEND_COOLDOWN_SECONDS || 60;
+const resendCooldownKey = import.meta.env.VITE_RESEND_COOLDOWN_KEY || "resendCooldownExpiresAt";
 
 function getRemainingCooldownSeconds() {
   const savedCooldownExpiresAt = window.sessionStorage.getItem(resendCooldownKey);
@@ -27,9 +27,6 @@ function getRemainingCooldownSeconds() {
 
 export default function VerifyEmail() {
   const [code, setCode] = useState("");
-  const [cooldownSecondsLeft, setCooldownSecondsLeft] = useState(() =>
-    getRemainingCooldownSeconds(),
-  );
   const {
     isLoading,
     verifyEmail,
@@ -38,9 +35,28 @@ export default function VerifyEmail() {
     message,
     error,
   } = useAuth();
+
+  const [cooldownSecondsLeft, setCooldownSecondsLeft] = useState(() =>
+    getRemainingCooldownSeconds(),
+  );
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
+
+  useEffect(() => {
+    const resendAvailableAt = location.state?.verificationResendAvailableAt;
+    console.log("resendAvailableAt:", resendAvailableAt);
+    if (!resendAvailableAt) return;
+
+    const expiresAtMs = new Date(resendAvailableAt).getTime();
+    if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) return;
+
+        console.log("expiresAtMs:", expiresAtMs);
+
+    window.sessionStorage.setItem(resendCooldownKey, String(expiresAtMs));
+    setCooldownSecondsLeft(getRemainingCooldownSeconds());
+  }, [location.state?.verificationResendAvailableAt]);
+
 
   useEffect(() => {
     clearAuthFeedback();

@@ -26,6 +26,7 @@ export async function checkAuth(req, res) {
 }
 
 export async function signup(req, res) {
+  const resetCooldown = parseInt(process.env.VERIFICATION_RESEND_COOLDOWN_SECONDS || 60);
   try {
     const { email, password, name } = req.body;
     if (!email || !password || !name) {
@@ -49,10 +50,11 @@ export async function signup(req, res) {
       name,
       verificationToken,
       verificationTokenExpiresAt,
+      verificationResendAvailableAt: new Date(Date.now() + resetCooldown * 1000)
     });
 
     // jwt
-    const token = generateTokenSetCookie(res, createdUser._id);
+    //const token = generateTokenSetCookie(res, createdUser._id);
 
     if (createdUser) {
       try {
@@ -86,6 +88,7 @@ export async function signup(req, res) {
           name: createdUser.name,
           email: createdUser.email,
           isVerified: createdUser.isVerified,
+          verificationResendAvailableAt: createdUser.verificationResendAvailableAt
         },
       });
     }
@@ -195,7 +198,7 @@ export async function resendVerificationEmail(req, res) {
     });
     return res
       .status(200)
-      .json({ message: "Verification code resent successfully" });
+      .json({ message: "Verification code resent successfully", verificationResendAvailableAt });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

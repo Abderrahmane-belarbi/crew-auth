@@ -32,8 +32,9 @@ export default function Register() {
   async function handleRegister(e) {
     e.preventDefault();
     try {
-      await signup(input.email, input.password, input.name);
-      navigate("/verify-email", { state: { email: input.email }});
+      const data = await signup(input.email, input.password, input.name);
+      console.log("Data from register:", data);
+      navigate("/verify-email", { state: { email: input.email, verificationResendAvailableAt: data?.user?.verificationResendAvailableAt ?? null }});
     } catch (error) {
       console.log(error);
     }
