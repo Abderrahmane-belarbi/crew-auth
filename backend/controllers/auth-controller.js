@@ -142,8 +142,9 @@ export function logout(req, res) {
 
 export async function resendVerificationEmail(req, res) {
   try {
+    const resetCooldown = parseInt(process.env.VERIFICATION_RESEND_COOLDOWN_SECONDS || 60);
+
     const { email } = req.body;
-    const resetCooldown = process.env.VERIFICATION_RESEND_COOLDOWN_SECONDS;
     if (!email) return res.status(400).json({ message: "Email is required" });
 
     const user = await User.findOne({ email });
@@ -165,8 +166,8 @@ export async function resendVerificationEmail(req, res) {
       );
     }
 
-    if(remainingSeconds > 0) {
-      return res.status(400).json({ message: `You can request a new verification code in ${remainingSeconds} second${remainingSeconds > 1 ? 's' : ''}.` });
+    if(remainingSeconds > 0) { // 429 Too many requests
+      return res.status(429).json({ message: `You can request a new verification code in ${remainingSeconds} second${remainingSeconds > 1 ? 's' : ''}.` });
     }
 
     const verificationToken = generateVerifcationToken();

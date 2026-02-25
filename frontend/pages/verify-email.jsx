@@ -5,11 +5,11 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import OTPCodeInput from "../components/otp-code-input";
 import { useAuth } from "../store/auth-store";
 
-const RESEND_COOLDOWN_SECONDS = 60;
-const RESEND_COOLDOWN_KEY = "verify-email-resend-cooldown-expires-at";
+const resendCooldownSeconds = import.meta.env.VERIFICATION_RESEND_COOLDOWN_SECONDS || 60;
+const resendCooldownKey = import.meta.env.RESEND_COOLDOWN_KEY || "resendCooldownExpiresAt";
 
 function getRemainingCooldownSeconds() {
-  const savedCooldownExpiresAt = window.sessionStorage.getItem(RESEND_COOLDOWN_KEY);
+  const savedCooldownExpiresAt = window.sessionStorage.getItem(resendCooldownKey);
   if (!savedCooldownExpiresAt) return 0;
 
   const secondsLeft = Math.max(
@@ -18,7 +18,7 @@ function getRemainingCooldownSeconds() {
   );
 
   if (secondsLeft <= 0) {
-    window.sessionStorage.removeItem(RESEND_COOLDOWN_KEY);
+    window.sessionStorage.removeItem(resendCooldownKey);
     return 0;
   }
 
@@ -48,7 +48,7 @@ export default function VerifyEmail() {
 
   useEffect(() => {
     if (cooldownSecondsLeft <= 0) {
-      window.sessionStorage.removeItem(RESEND_COOLDOWN_KEY);
+      window.sessionStorage.removeItem(resendCooldownKey);
       return;
     }
 
@@ -90,12 +90,12 @@ export default function VerifyEmail() {
   }
 
   async function handleResend() {
-    //if (cooldownSecondsLeft > 0) return;
+    if (cooldownSecondsLeft > 0) return;
 
     try {
       await resendVerificationEmail(email);
-      const cooldownExpiresAt = Date.now() + RESEND_COOLDOWN_SECONDS * 1000;
-      window.sessionStorage.setItem(RESEND_COOLDOWN_KEY, String(cooldownExpiresAt));
+      const cooldownExpiresAt = Date.now() + resendCooldownSeconds * 1000;
+      window.sessionStorage.setItem(resendCooldownKey, String(cooldownExpiresAt));
       setCooldownSecondsLeft(getRemainingCooldownSeconds());
     } catch (resendError) {
       console.log(resendError);
@@ -144,7 +144,7 @@ export default function VerifyEmail() {
           Didn&apos;t receive the code?{" "}
           <button
             onClick={handleResend}
-            disabled={isLoading}
+            disabled={isLoading || cooldownSecondsLeft > 0}
             className="text-primary hover:text-secondary transition-colors cursor-pointer disabled:cursor-default disabled:text-muted-foreground disabled:opacity-50"
           >
             {cooldownSecondsLeft > 0
