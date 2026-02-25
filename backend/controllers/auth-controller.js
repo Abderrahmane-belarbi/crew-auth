@@ -142,8 +142,8 @@ export function logout(req, res) {
 
 export async function resendVerificationEmail(req, res) {
   try {
-    const { email, resetCooldown } = req.body;
-
+    const { email } = req.body;
+    const resetCooldown = process.env.VERIFICATION_RESEND_COOLDOWN_SECONDS;
     if (!email) return res.status(400).json({ message: "Email is required" });
 
     const user = await User.findOne({ email });
