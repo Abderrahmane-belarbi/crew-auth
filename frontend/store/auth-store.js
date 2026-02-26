@@ -11,7 +11,6 @@ export const useAuth = create((set) => ({
   isLoading: false,
   isCheckingAuth: true,
   message: null,
-  verificationResendAvailableAt: null,
 
   clearAuthFeedback: () => {
     set({ message: null, error: null })
@@ -33,7 +32,6 @@ export const useAuth = create((set) => ({
           isAuthenticated: true,
           message: data.message,
         });
-        return data;
       } else {
         const errorMessage = data?.message || "Error signing up";
         set({
@@ -74,7 +72,6 @@ export const useAuth = create((set) => ({
         set({ error: errorMessage });
         throw new Error(errorMessage);
       }
-      return data;
     } catch (error) {
       const errorMessage = error.message || "Unable to resend verification email";
       set({ error: errorMessage });

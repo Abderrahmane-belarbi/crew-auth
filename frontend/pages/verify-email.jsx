@@ -30,10 +30,10 @@ export default function VerifyEmail() {
   const {
     isLoading,
     verifyEmail,
-    resendVerificationEmail,
     clearAuthFeedback,
     message,
     error,
+    resendVerificationEmail
   } = useAuth();
 
   const [cooldownSecondsLeft, setCooldownSecondsLeft] = useState(() =>
@@ -42,21 +42,6 @@ export default function VerifyEmail() {
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
-
-  useEffect(() => {
-    const resendAvailableAt = location.state?.verificationResendAvailableAt;
-    console.log("resendAvailableAt:", resendAvailableAt);
-    if (!resendAvailableAt) return;
-
-    const expiresAtMs = new Date(resendAvailableAt).getTime();
-    if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) return;
-
-        console.log("expiresAtMs:", expiresAtMs);
-
-    window.sessionStorage.setItem(resendCooldownKey, String(expiresAtMs));
-    setCooldownSecondsLeft(getRemainingCooldownSeconds());
-  }, [location.state?.verificationResendAvailableAt]);
-
 
   useEffect(() => {
     clearAuthFeedback();
