@@ -9,11 +9,31 @@ export const useAuth = create((set) => ({
   isAuthenticated: false,
   error: null,
   isLoading: false,
-  isCheckingAuth: true,
+  isCheckingAuth: false,
   message: null,
 
   clearAuthFeedback: () => {
     set({ message: null, error: null })
+  },
+  checkAuth: async() => {
+    set({ isCheckingAuth: true, isAuthenticated: false});
+    try {
+      const res = await fetch(`${API_URL}/check-auth`);
+      console.log("Response:", res);
+      const data = await res.json()
+      console.log("Data:", data);
+      if(res.ok) {
+        set({ user: data.user, error: null, isAuthenticated: true});
+        return;
+      }
+      const checkAuthError = data.error;
+      set({ error: checkAuthError, user: null })
+    } catch (error) {
+      set({ error: error.message, user: null })
+      console.log(error);
+    } finally {
+      set({ isCheckingAuth: false })
+    }
   },
   signup: async (email, password, name) => {
     set({ isLoading: true, error: null, message: null });
@@ -28,8 +48,6 @@ export const useAuth = create((set) => ({
       const data = await res.json();
       if(res.ok) {
         set({
-          user: data.user,
-          isAuthenticated: true,
           message: data.message,
         });
       } else {
@@ -97,7 +115,7 @@ export const useAuth = create((set) => ({
       });
       const data = await res.json();
       if(res.ok) {
-        set({  isAuthenticated: true, message: data.message });
+        set({  isAuthenticated: true, message: data.message, user: data.user });
       } else if (res.status === 410) {
         set({ isAuthenticated: true, message: data.message, error: null });
       }

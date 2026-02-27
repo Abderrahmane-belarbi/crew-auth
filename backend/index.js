@@ -17,10 +17,6 @@ app.use(express.json()); // to parse incoming requests with JSON payloads (req.b
 
 app.use(cookieParser()); // to parse cookies from incoming requests (req.cookies)
 
-app.get("/", (req, res) => {
-  res.send("Home Page");
-});
-
 app.use("/api/auth", authRoutes);
 
 async function start() {

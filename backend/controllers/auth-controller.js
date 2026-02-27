@@ -14,14 +14,14 @@ export async function checkAuth(req, res) {
     if (!user)
       return res
         .status(404)
-        .json({ ok: false, message: "User not found", data: {} });
+        .json({ error: "User not found" });
     return res
       .status(200)
-      .json({ ok: true, message: "User found", data: user });
+      .json({ message: "User found", user });
   } catch (error) {
     return res
       .status(500)
-      .json({ ok: false, message: error.message, data: {} });
+      .json({ error: error.message });
   }
 }
 
@@ -79,14 +79,6 @@ export async function signup(req, res) {
 
       return res.status(201).json({
         message: "User created successfully, Please verify your email.",
-        user: {
-          // createdUser is a Mongoose Document, not a plain JavaScript object. save(), populate(), toObject(), toJSON()
-          // createdUser._doc is the user data that we need
-          _id: createdUser._id,
-          name: createdUser.name,
-          email: createdUser.email,
-          isVerified: createdUser.isVerified,
-        },
       });
     }
   } catch (error) {
@@ -116,10 +108,11 @@ export async function login(req, res) {
     if (!passwordMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    // jwt
-    generateTokenSetCookie(res, user._id);
     user.lastLogin = new Date();
     await user.save();
+
+    // jwt
+    generateTokenSetCookie(res, user._id);
 
     return res.status(200).json({
       message: "User Logged in successfully",
@@ -229,6 +222,9 @@ export async function verificationEmail(req, res) {
     user.verificationToken = undefined;
 
     await user.save();
+
+    // jwt
+    generateTokenSetCookie(res, user._id);
 
     return res.status(200).json({
       message: "The email has been verified successfully",

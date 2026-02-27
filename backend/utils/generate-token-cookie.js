@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export function generateTokenSetCookie(res, userId) {
+  
   const token = jwt.sign({userId}, process.env.JWT_SECRET, {
     expiresIn: "7d"
   });
@@ -11,6 +12,5 @@ export function generateTokenSetCookie(res, userId) {
     sameSite: "strict", // This reduces CSRF risk by telling the browser: “Do not send this cookie on cross-site requests.”
     maxAge: 7 * 24 * 60 * 60 * 1000 // expire in 7 days
   });
-
   return token;
 }
