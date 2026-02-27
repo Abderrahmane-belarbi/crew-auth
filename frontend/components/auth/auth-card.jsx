@@ -1,7 +1,7 @@
 
-export function AuthCard({ title, subtitle, children }) {
+export function AuthCard({ title, subtitle, children, width="max-w-md" }) {
   return (
-    <div className="w-full max-w-md animate-[fade-in_0.5s_ease-out_forwards]">
+    <div className={`w-full ${width} animate-[fade-in_0.5s_ease-out_forwards]`}>
       <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-xl shadow-2xl">
         <div className="px-8 py-10">
           {/* Header */}

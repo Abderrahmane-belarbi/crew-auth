@@ -7,6 +7,7 @@ import VerifyEmail from "../pages/verify-email.jsx";
 import { useAuth } from "../store/auth-store.js";
 import { useEffect } from "react";
 import Dashboard from "../pages/dashboard.jsx";
+import LoadingSpinner from "../components/shared/loading-spinner.jsx";
 
 function RedirectAuthenticatedUser({ children }) {
   const { isAuthenticated, user } = useAuth();
@@ -29,10 +30,14 @@ function ProtectRoute({ children }) {
 
 export default function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuth();
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-  if (isCheckingAuth) return null;
+
+  if(isCheckingAuth) return <LoadingSpinner />
+
+
   return (
     <AnimatedBackground>
       <Routes>

@@ -11,6 +11,8 @@
   --muted: rgba(79, 70, 229, 0.1);
   --border: rgba(79, 70, 229, 0.2);
   --input: rgba(20, 13, 41, 0.5);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 }
 
 @theme inline {
@@ -24,6 +26,8 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 }
 
 

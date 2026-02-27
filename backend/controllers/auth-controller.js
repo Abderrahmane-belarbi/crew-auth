@@ -7,6 +7,7 @@ import {
 } from "../utils/generate-verification-token.js";
 import { generateTokenSetCookie } from "../utils/generate-token-cookie.js";
 import { sendEmail } from "../utils/send-email.js";
+import { UAParser } from "ua-parser-js";
 
 export async function checkAuth(req, res) {
   try {
@@ -49,6 +50,16 @@ export async function signup(req, res) {
       name,
       verificationToken,
       verificationTokenExpiresAt,
+      authMeta: {
+        login: {
+          at: null,
+          ipAddress: null,
+          browser: null,
+          os: null,
+          device: null
+        },
+        passwordChangedAt: null
+      }
     });
 
     if (createdUser) {
@@ -84,6 +95,17 @@ export async function signup(req, res) {
 }
 
 export async function login(req, res) {
+  const userAgent = req.headers["user-agent"];
+  const parser = new UAParser(userAgent);
+  const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const browser = parser.getBrowser().name;
+  const os = parser.getOS().name;
+  const device = parser.getDevice().type || "desktop";
+  console.log("userAgent:", userAgent);
+  console.log("ipAddress:", ipAddress);
+  console.log("browser:", browser);
+  console.log("os:", os);
+  console.log("deviceType:", device);
   try {
     const { email, password } = req.body;
     if (!email || !password)
@@ -105,7 +127,11 @@ export async function login(req, res) {
     if (!passwordMatch)
       return res.status(400).json({ error: "Invalid credentials" });
 
-    user.lastLogin = new Date();
+    user.authMeta.login.at = new Date();
+    user.authMeta.login.ipAddress = ipAddress;
+    user.authMeta.login.browser = browser;
+    user.authMeta.login.os = os;
+    user.authMeta.login.device = device;
     await user.save();
 
     // jwt
@@ -118,6 +144,7 @@ export async function login(req, res) {
         name: user.name,
         email: user.email,
         isVerified: user.isVerified,
+        authMeta: user.authMeta,
       },
     });
   } catch (error) {
@@ -194,6 +221,12 @@ export async function resendVerificationEmail(req, res) {
 }
 
 export async function verificationEmail(req, res) {
+  const userAgent = req.headers["user-agent"];
+  const parser = new UAParser(userAgent);
+  const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const browser = parser.getBrowser().name;
+  const os = parser.getOS().name;
+  const device = parser.getDevice().type || "desktop";
   try {
     const { code, email } = req.body;
     if (!code || !email)
@@ -219,6 +252,12 @@ export async function verificationEmail(req, res) {
     user.isVerified = true;
     user.verificationTokenExpiresAt = undefined;
     user.verificationToken = undefined;
+    user.authMeta.login.at = new Date();
+    user.authMeta.login.ipAddress = ipAddress;
+    user.authMeta.login.browser = browser;
+    user.authMeta.login.os = os;
+    user.authMeta.login.device = device;
+    user.authMeta.emailVerifiedAt = new Date();
 
     await user.save();
 
@@ -232,6 +271,7 @@ export async function verificationEmail(req, res) {
         name: user.name,
         email: user.email,
         isVerified: user.isVerified,
+        authMeta: user.authMeta,
       },
     });
   } catch (error) {

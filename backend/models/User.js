@@ -1,5 +1,18 @@
 import { model, Schema } from "mongoose"
 
+const AuthMetaSchema = new Schema({
+  login: {
+    at: Date,
+    ip: String,
+    userAgent: String,
+    browser: String,
+    os: String,
+    device: String
+  },
+  passwordChangedAt: Date,
+  emailVerifiedAt: Date
+})
+
 const UserSchema = new Schema({
   email: {
     type: String,
@@ -14,10 +27,6 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
-  lastLogin: {
-    type: Date,
-    default: Date.now
-  },
   isVerified: {
     type: Boolean,
     default: false
@@ -27,6 +36,7 @@ const UserSchema = new Schema({
   verificationToken: String,
   verificationTokenExpiresAt: Date,
   verificationResendAvailableAt: Date,
+  authMeta: AuthMetaSchema
 }, { timestamps: true })
 
 const User = model("User", UserSchema);
