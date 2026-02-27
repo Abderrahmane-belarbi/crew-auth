@@ -6,7 +6,12 @@ import { useAuth } from "../store/auth-store";
 import { formatDate } from "../lib/utils/format-date";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+  }
+
   return (
     <div className="w-full max-w-2xl px-4 py-12">
       <div className="animate-[fade-in_0.5s_ease-out] space-y-6">
@@ -132,7 +137,7 @@ export default function Dashboard() {
         {/* Logout Button */}
         <div className="flex gap-3">
           <button
-            onClick={() => {}}
+            onClick={handleLogout}
             disabled={false}
             className="flex-1 h-12 rounded-lg border border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >

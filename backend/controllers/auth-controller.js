@@ -156,7 +156,7 @@ export function logout(req, res) {
   res.clearCookie("token");
   res
     .status(200)
-    .json({ ok: true, message: "Logged out successfully", data: {} });
+    .json({ message: "Logged out successfully" });
 }
 
 export async function resendVerificationEmail(req, res) {
