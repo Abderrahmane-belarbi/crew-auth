@@ -36,7 +36,6 @@ export default function OTPCodeInput({onChange, onComplete}) {
     }
   
     function handleKeyDown(index, e) {
-      console.log("keydown index:", index, "value:", code[index]);
       if (e.key === "Backspace" && !code[index] && index > 0) {
         inputRefs.current[index - 1].focus();
       }

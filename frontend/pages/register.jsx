@@ -55,11 +55,9 @@ export default function Register() {
     const validatedInput = registerSchema.safeParse(input);
     if(!validatedInput.success) {
       const zodErrors = toFieldsErrors(validatedInput.error);
-      console.log(zodErrors);
       setErrors(zodErrors)
       return;
     }
-    console.log("validatedInput:", validatedInput.data);
     
     try {
       await signup(

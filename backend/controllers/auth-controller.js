@@ -51,9 +51,6 @@ export async function signup(req, res) {
       verificationTokenExpiresAt,
     });
 
-    // jwt
-    //const token = generateTokenSetCookie(res, createdUser._id);
-
     if (createdUser) {
       try {
         // Send Verification Email

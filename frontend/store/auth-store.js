@@ -18,10 +18,13 @@ export const useAuth = create((set) => ({
   checkAuth: async() => {
     set({ isCheckingAuth: true, isAuthenticated: false});
     try {
-      const res = await fetch(`${API_URL}/check-auth`);
-      console.log("Response:", res);
+      const res = await fetch(`${API_URL}/check-auth`, {
+        credentials: "include", // critical for cookie-based auth across frontend/backend origins
+        // we need it:
+        // when browser must accept Set-Cookie from backend response like /verify-email, /login
+        // browser must send existing cookie to backend like /check-auth, /logout or any protected routes
+      });
       const data = await res.json()
-      console.log("Data:", data);
       if(res.ok) {
         set({ user: data.user, error: null, isAuthenticated: true});
         return;
@@ -107,11 +110,16 @@ export const useAuth = create((set) => ({
         throw new Error(noEmailError)
       };    
       const res = await fetch(`${API_URL}/verify-email`, {
+        credentials: "include", // critical for cookie-based auth across frontend/backend origins
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ code, email }),
+        credentials: "include", // critical for cookie-based auth across frontend/backend origins
+        // we need it:
+        // when browser must accept Set-Cookie from backend response like /verify-email, /login
+        // browser must send existing cookie to backend like /check-auth, /logout or any protected routes
       });
       const data = await res.json();
       if(res.ok) {

@@ -13,8 +13,6 @@ export default function App() {
   useEffect(() => {
     checkAuth();
   }, []);
-  console.log("isAuthenticated:", isAuthenticated);
-  console.log("User:", user);
   return (
     <AnimatedBackground>
       <Routes>
