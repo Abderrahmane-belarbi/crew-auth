@@ -16,7 +16,7 @@ export const useAuth = create((set) => ({
     set({ message: null, error: null })
   },
   checkAuth: async() => {
-    set({ isCheckingAuth: true, isAuthenticated: false});
+    set({ isCheckingAuth: true, isAuthenticated: false, error: null});
     try {
       const res = await fetch(`${API_URL}/check-auth`, {
         credentials: "include", // critical for cookie-based auth across frontend/backend origins
@@ -26,13 +26,12 @@ export const useAuth = create((set) => ({
       });
       const data = await res.json()
       if(res.ok) {
-        set({ user: data.user, error: null, isAuthenticated: true});
+        set({ user: data.user, isAuthenticated: true});
         return;
       }
-      const checkAuthError = data.error;
-      set({ error: checkAuthError, user: null })
+      set({ user: null })
     } catch (error) {
-      set({ error: error.message, user: null })
+      set({ user: null })
       console.log(error);
     } finally {
       set({ isCheckingAuth: false })
@@ -158,7 +157,7 @@ export const useAuth = create((set) => ({
       });
       const data = await res.json();
       if(res.ok) {
-        set({ user: data.user, message: data.message })
+        set({ user: data.user, message: data.message, isAuthenticated: true, error: null })
       } else {
         const loginError = data.error;
         set({ error: loginError })

@@ -30,9 +30,6 @@ export default function Login() {
     e.preventDefault();
     try {
       await login(input.email, input.password);
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 3000)
     } catch (error) {
       console.log(error);
     }

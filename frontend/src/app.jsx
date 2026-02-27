@@ -31,7 +31,8 @@ export default function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuth();
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
+  if (isCheckingAuth) return null;
   return (
     <AnimatedBackground>
       <Routes>
