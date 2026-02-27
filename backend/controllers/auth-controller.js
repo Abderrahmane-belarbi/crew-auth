@@ -89,21 +89,21 @@ export async function login(req, res) {
     if (!email || !password)
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ error: "Email and password are required" });
 
     // we put Invalid credentials for both email and password for security reasons
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
     if (!user.isVerified)
       return res
         .status(403)
-        .json({ message: "Please verify your email before logging in" });
+        .json({ error: "Please verify your email before logging in" });
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch)
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ error: "Invalid credentials" });
 
     user.lastLogin = new Date();
     await user.save();
@@ -113,13 +113,15 @@ export async function login(req, res) {
 
     return res.status(200).json({
       message: "User Logged in successfully",
-      data: {
-        ...user._doc,
-        password: undefined,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
       },
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ error: error.message });
   }
 }
 

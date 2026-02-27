@@ -138,5 +138,37 @@ export const useAuth = create((set) => ({
     } finally {
       set({ isLoading: false })
     }
+  },
+  login: async (email, password) => {
+    set({ isLoading: true, error: null, message: null })
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include", // critical for cookie-based auth across frontend/backend origins
+        // we need it:
+        // when browser must accept Set-Cookie from backend response like /verify-email, /login
+        // browser must send existing cookie to backend like /check-auth, /logout or any protected routes
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+      const data = await res.json();
+      if(res.ok) {
+        set({ user: data.user, message: data.message })
+      } else {
+        const loginError = data.error;
+        set({ error: loginError })
+        throw new Error(loginError);
+      }
+    } catch (error) {
+      set({ error: error.message })
+      throw new Error(error.message);
+    } finally {
+      set({ isLoading: false })
+    }
   }
 }));
