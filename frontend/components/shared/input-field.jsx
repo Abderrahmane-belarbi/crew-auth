@@ -4,6 +4,7 @@ import { useState } from "react";
 export default function InputField({
   type = "text",
   name,
+  setError,
   Icon,
   className = "",
   placeholder,
@@ -16,6 +17,7 @@ export default function InputField({
 }) {
   const [toggled, setToggled] = useState("password");
   return (
+    <div>
     <div className="relative">
       {Icon && (
         <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -53,5 +55,7 @@ export default function InputField({
           </button>
         )}
     </div>
+        <p className="text-sm mt-1 text-red-500">{setError}</p>
+  </div>
   );
 }

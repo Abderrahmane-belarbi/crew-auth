@@ -6,6 +6,8 @@ import GradientButton from "../components/gradient-button";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthChecker from "../components/password-strength-checker";
 import { useAuth } from "../store/auth-store";
+import { registerSchema } from "../lib/validation/user-schema";
+import { z } from "zod";
 
 export default function Register() {
   const [input, setInput] = useState({
@@ -13,6 +15,12 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
+  });
+  const [errors, setErrors] = useState({
+    email: undefined,
+    name: undefined,
+    password: undefined,
+    confirmPassword: undefined
   });
 
   const { signup, clearAuthFeedback, isLoading, error } = useAuth();
@@ -27,12 +35,38 @@ export default function Register() {
     setInput((prev) => {
       return { ...prev, [name]: value };
     });
+    setErrors((prev) => {
+      return { ...prev, [name]: undefined }
+    })
+  }
+
+  function toFieldsErrors(error) {
+    const flat = z.flattenError(error).fieldErrors;
+    return {
+      email: flat.email?.[0],
+      name: flat.name?.[0],
+      password: flat.password?.[0],
+      confirmPassword: flat.confirmPassword?.[0],
+    }
   }
 
   async function handleRegister(e) {
     e.preventDefault();
+    const validatedInput = registerSchema.safeParse(input);
+    if(!validatedInput.success) {
+      const zodErrors = toFieldsErrors(validatedInput.error);
+      console.log(zodErrors);
+      setErrors(zodErrors)
+      return;
+    }
+    console.log("validatedInput:", validatedInput.data);
+    
     try {
-      await signup(input.email, input.password, input.name);
+      await signup(
+        validatedInput.data.email,
+        validatedInput.data.password,
+        validatedInput.data.name,
+      );
       navigate("/verify-email", { state: { email: input.email }});
     } catch (error) {
       console.log(error);
@@ -45,6 +79,7 @@ export default function Register() {
         <InputField
           type="text"
           name="name"
+          setError={errors.name}
           Icon={User}
           placeholder="Full name"
           value={input.name}
@@ -56,6 +91,7 @@ export default function Register() {
         <InputField
           type="email"
           name="email"
+          setError={errors.email}
           Icon={Mail}
           placeholder="example@email.com"
           value={input.email}
@@ -66,6 +102,7 @@ export default function Register() {
         <InputField
           type="password"
           name="password"
+          setError={errors.password}
           Icon={Lock}
           placeholder="Register password"
           value={input.password}
@@ -76,6 +113,7 @@ export default function Register() {
         <InputField
           type="password"
           name="confirmPassword"
+          setError={errors.confirmPassword}
           Icon={Lock}
           placeholder="Confirm password"
           value={input.confirmPassword}
