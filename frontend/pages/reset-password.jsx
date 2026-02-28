@@ -6,21 +6,37 @@ import { AuthCard } from "../components/auth/auth-card";
 import InputField from "../components/shared/input-field";
 import { Lock } from "lucide-react";
 import { useAuth } from "../store/auth-store";
+import { resetPasswordSchema } from "../lib/validation/password-schema";
+import { z } from "zod";
 
 export default function ResetPassword() {
   const { token } = useParams();
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [inputErrors, setInputErrors] = useState({
+    password: undefined,
+    confirmPassword: undefined
+  });
+  const { resetPassword, error, message, isLoading } = useAuth();
 
-   const { resetPassword, error, message, isLoading } = useAuth();
+  function extractFieldErrors(error) {
+    const flattenError = z.flattenError(error).fieldErrors;
+    return {
+      password: flattenError.password?.[0],
+      confirmPassword: flattenError.confirmPassword?.[0]
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validatedInput = resetPasswordSchema.safeParse({password, confirmPassword})
+    if(!validatedInput.success) {
+      const errors = extractFieldErrors(validatedInput.error);
+      setInputErrors(errors);
+      return;
+    }
     try {
       await resetPassword(token, password);
-      setSubmitted(true);
     } catch (error) {
       console.log(error.message);
     }
@@ -64,7 +80,11 @@ export default function ResetPassword() {
             Icon={Lock}
             placeholder="New password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              setInputErrors((prev) => { return { ...prev, password: undefined } })
+            }}
+            setError={inputErrors.password}
             autoComplete="current-password"
             required
           />
@@ -81,7 +101,11 @@ export default function ResetPassword() {
             Icon={Lock}
             placeholder="New password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setInputErrors((prev) => { return { ...prev, confirmPassword: undefined } })
+            }}
+            setError={inputErrors.confirmPassword}
             autoComplete="new-password"
             required
           />
