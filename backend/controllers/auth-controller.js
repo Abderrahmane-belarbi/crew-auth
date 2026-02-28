@@ -283,75 +283,68 @@ export async function forgotPassword(req, res) {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
-    if (!user)
-      return res
-        .status(400)
-        .json({ ok: false, message: "User not found", data: {} });
+    if (user) {
+      // Generate reset token and hash it for security
+      const resetPasswordToken = crypto.randomUUID();
+      const hashedToken = crypto
+        .createHash("sha256")
+        .update(resetPasswordToken)
+        .digest("hex");
+      // Update user token
+      user.resetPasswordToken = hashedToken;
+      user.resetPasswordExpiresAt = Date.now() + 10 * 60 * 1000; // expires in 10 min
+      await user.save();
 
-    // Generate reset token and hash it for security
-    const resetPasswordToken = crypto.randomUUID();
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(resetPasswordToken)
-      .digest("hex");
-    // Update user token
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpiresAt = Date.now() + 10 * 60 * 1000; // expires in 10 min
-    await user.save();
+      // Send email to user resetPasswordToken not the hashed
+      // Send the raw token to the user in the link
+      // When user comes back with raw token, you hash it and compare to DB
+      const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetPasswordToken}`;
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your password",
+        text: `You requested a password reset. Use this link to reset your password: ${resetUrl} (expires in 10 minutes). If you didn't request this, ignore this email.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.5;">
+            <h2 style="margin-bottom: 8px;">Reset your password</h2>
+            <p style="margin-top: 0;">
+              We received a request to reset your password. Click the button below to choose a new one.
+            </p>
 
-    // Send email to user resetPasswordToken not the hashed
-    // Send the raw token to the user in the link
-    // When user comes back with raw token, you hash it and compare to DB
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetPasswordToken}`;
-    await sendEmail({
-      to: user.email,
-      subject: "Reset your password",
-      text: `You requested a password reset. Use this link to reset your password: ${resetUrl} (expires in 10 minutes). If you didn't request this, ignore this email.`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.5;">
-          <h2 style="margin-bottom: 8px;">Reset your password</h2>
-          <p style="margin-top: 0;">
-            We received a request to reset your password. Click the button below to choose a new one.
-          </p>
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${resetUrl}"
+                style="display: inline-block; background: #111827; color: #ffffff; padding: 12px 18px; border-radius: 10px; text-decoration: none; font-weight: 600;">
+                Reset Password
+              </a>
+            </div>
 
-          <div style="text-align: center; margin: 24px 0;">
-            <a href="${resetUrl}"
-              style="display: inline-block; background: #111827; color: #ffffff; padding: 12px 18px; border-radius: 10px; text-decoration: none; font-weight: 600;">
-              Reset Password
-            </a>
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">
+              This link expires in <b>10 minutes</b>.
+            </p>
+
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">
+              If the button doesn’t work, copy and paste this link into your browser:
+            </p>
+            <p style="font-size: 14px; word-break: break-all; margin-top: 8px;">
+              <a href="${resetUrl}">${resetUrl}</a>
+            </p>
+
+            <p style="color: #6b7280; font-size: 14px; margin-top: 18px;">
+              If you didn’t request a password reset, you can safely ignore this email.
+            </p>
           </div>
-
-          <p style="color: #6b7280; font-size: 14px; margin: 0;">
-            This link expires in <b>10 minutes</b>.
-          </p>
-
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-
-          <p style="color: #6b7280; font-size: 14px; margin: 0;">
-            If the button doesn’t work, copy and paste this link into your browser:
-          </p>
-          <p style="font-size: 14px; word-break: break-all; margin-top: 8px;">
-            <a href="${resetUrl}">${resetUrl}</a>
-          </p>
-
-          <p style="color: #6b7280; font-size: 14px; margin-top: 18px;">
-            If you didn’t request a password reset, you can safely ignore this email.
-          </p>
-        </div>
-      `,
-    });
+        `,
+      });
+    }
 
     return res
       .status(200)
-      .json({
-        ok: true,
-        message: "Password reset link sent to your email",
-        data: {},
-      });
+      .json({ message: "If an account exists, a reset link has been sent. Check your inbox and spam folder." });
   } catch (error) {
     return res
       .status(500)
-      .json({ ok: false, message: error.message, data: {} });
+      .json({ error: error.message });
   }
 }
 
@@ -362,11 +355,11 @@ export async function resetPassword(req, res) {
     if (!password)
       return res
         .status(400)
-        .json({ ok: false, message: "Password required", data: {} });
+        .json({ error: "Password required" });
     if (!token)
       return res
         .status(400)
-        .json({ ok: false, message: "Token required", data: {} });
+        .json({ error: "Token required" });
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
@@ -380,24 +373,21 @@ export async function resetPassword(req, res) {
     if (!user)
       return res
         .status(400)
-        .json({
-          ok: false,
-          message: "Invalid or expired reset password token",
-          data: {},
-        });
+        .json({ error: "Invalid or expired reset password token" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiresAt = undefined;
+    user.authMeta.passwordChangedAt = new Date()
     await user.save();
 
     return res
       .status(200)
-      .json({ ok: true, message: "Password reset successfully", data: {} });
+      .json({ message: "Password reset successfully" });
   } catch (error) {
     return res
       .status(500)
-      .json({ ok: false, message: error.message, data: {} });
+      .json({ error: error.message });
   }
 }

@@ -63,13 +63,21 @@ export default function Home() {
               to="/forgot-password"
               className="w-full h-11 rounded-lg border border-border/40 bg-muted/30 hover:bg-muted/70 text-foreground transition-colors font-medium flex items-center justify-center gap-2"
             >
+              <span>Forgot Password</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              to="/reset-password"
+              className="w-full h-11 rounded-lg border border-border/40 bg-muted/30 hover:bg-muted/70 text-foreground transition-colors font-medium flex items-center justify-center gap-2"
+            >
               <span>Reset Password</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
 
             <Link
               to="/verify-email"
-              className="w-full h-11 rounded-lg border border-border/40 bg-muted/30 hover:bg-muted/70 text-foreground transition-colors font-medium flex items-center justify-center gap-2"
+              className="sm:col-span-2 w-full h-11 rounded-lg border border-border/40 bg-muted/30 hover:bg-muted/70 text-foreground transition-colors font-medium flex items-center justify-center gap-2"
             >
               <span>Verify Email</span>
               <ArrowRight className="h-4 w-4" />

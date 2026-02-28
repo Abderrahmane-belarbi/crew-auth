@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+import { resetPassword } from "../../backend/controllers/auth-controller";
 
 const API_URL = "http://localhost:5000/api/auth";
 axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
@@ -191,6 +192,56 @@ export const useAuth = create((set) => ({
     } catch (error) {
       set({ error: error.message })
       throw new Error(error.message);
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+  forgotPassword: async (email) => {
+    set({ isLoading: true, error: null, message: null })
+    try {
+      const res = await fetch(`${API_URL}/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email
+        })
+      });
+      const data = await res.json();
+      if(res.ok) {
+        set({ message: data.message });
+        return;
+      }
+      throw new Error(data.error);
+    } catch (error) {
+      set({ error: error.message })
+      throw error;
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+  resetPassword: async(token, password) => {
+    set({ isLoading: true, error: null, message: null })
+    try {
+      const res = await fetch(`${API_URL}/reset-password/${token}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          password
+        })
+      });
+      const data = await res.json();
+      if(res.ok) {
+        set({ message: data.message });
+        return;
+      }
+      throw new Error(data.message);
+    } catch (error) {
+      set({ error: error.message });
+      throw error
     } finally {
       set({ isLoading: false })
     }

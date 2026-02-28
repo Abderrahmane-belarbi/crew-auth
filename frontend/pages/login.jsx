@@ -80,7 +80,7 @@ export default function Login() {
       </form>
       <div className="mt-6 space-y-4 text-center text-sm">
         <Link
-          href="/forgot-password"
+          to="/forgot-password"
           className="block text-muted-foreground hover:text-primary transition-colors"
         >
           Forgot your password?

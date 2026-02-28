@@ -8,6 +8,8 @@ import { useAuth } from "../store/auth-store.js";
 import { useEffect } from "react";
 import Dashboard from "../pages/dashboard.jsx";
 import LoadingSpinner from "../components/shared/loading-spinner.jsx";
+import ForgotPassword from "../pages/forgot-password..jsx";
+import ResetPassword from "../pages/reset-password.jsx";
 
 function RedirectAuthenticatedUser({ children }) {
   const { isAuthenticated, user } = useAuth();
@@ -53,6 +55,9 @@ export default function App() {
           </RedirectAuthenticatedUser>
         } />
         <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
         <Route path="/dashboard" element={
           <ProtectRoute>
             <Dashboard />
