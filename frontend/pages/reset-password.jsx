@@ -1,11 +1,105 @@
+import { useState } from "react";
+import { FeedbackAlert } from "../components/shared/feedback-alert";
+import GradientButton from "../components/gradient-button";
+import { Link, useParams } from "react-router-dom";
+import { AuthCard } from "../components/auth/auth-card";
+import InputField from "../components/shared/input-field";
+import { Lock } from "lucide-react";
+import { useAuth } from "../store/auth-store";
+
 export default function ResetPassword() {
+  const { token } = useParams();
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+   const { resetPassword, error, message, isLoading } = useAuth();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await resetPassword(token, password);
+      setSubmitted(true);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  if (message) {
+    return (
+      <AuthCard
+        title="Password Reset"
+        subtitle="Your password has been updated"
+      >
+        <div className="space-y-6">
+          <FeedbackAlert
+            type="success"
+            message={message}
+          />
+
+          <Link to="/login">
+            <GradientButton type="button">Sign In</GradientButton>
+          </Link>
+        </div>
+      </AuthCard>
+    );
+  }
+
   return (
-      <div>
-         <h1>Reset Password</h1>
-         <form>
-            <input type="email" placeholder="Email" />
-            <button type="submit">Submit</button>
-         </form>
+    <AuthCard
+      title="Create New Password"
+      subtitle="Enter a new password for your account"
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && <FeedbackAlert type="error" message={error} />}
+        <div>
+          <label htmlFor="password" className="sr-only">
+            New Password
+          </label>
+          <InputField
+            id="password"
+            type="password"
+            name="password"
+            Icon={Lock}
+            placeholder="New password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="confirmPassword" className="sr-only">
+            Confirm Password
+          </label>
+          <InputField
+            id="confirmPassword"
+            type="password"
+            name="password"
+            Icon={Lock}
+            placeholder="New password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="new-password"
+            required
+          />
+        </div>
+
+        <GradientButton type="submit" isLoading={isLoading}>
+          Reset Password
+        </GradientButton>
+      </form>
+
+      <div className="mt-6 text-center">
+        <Link
+          to="/login"
+          className="text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
+          ← Back to login
+        </Link>
       </div>
-   )
+    </AuthCard>
+  );
 }

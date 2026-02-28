@@ -1,5 +1,5 @@
 import AnimatedBackground from "../components/animated-background.jsx";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import Home from "../pages/home.jsx";
 import Login from "../pages/login.jsx";
 import Register from "../pages/register.jsx";
@@ -37,32 +37,47 @@ export default function App() {
     checkAuth();
   }, [checkAuth]);
 
-  if(isCheckingAuth) return <LoadingSpinner />
-
+  if (isCheckingAuth) return <LoadingSpinner />;
 
   return (
     <AnimatedBackground>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={
-          <RedirectAuthenticatedUser>
-            <Login />
-          </RedirectAuthenticatedUser>
-        } />
-        <Route path="/register" element={
-          <RedirectAuthenticatedUser>
-            <Register />
-          </RedirectAuthenticatedUser>
-        } />
+        <Route
+          path="/login"
+          element={
+            <RedirectAuthenticatedUser>
+              <Login />
+            </RedirectAuthenticatedUser>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <RedirectAuthenticatedUser>
+              <Register />
+            </RedirectAuthenticatedUser>
+          }
+        />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route
+          path="/reset-password/:token"
+          element={
+            <RedirectAuthenticatedUser>
+              <ResetPassword />
+            </RedirectAuthenticatedUser>
+          }
+        />
 
-        <Route path="/dashboard" element={
-          <ProtectRoute>
-            <Dashboard />
-          </ProtectRoute>
-        } />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectRoute>
+              <Dashboard />
+            </ProtectRoute>
+          }
+        />
       </Routes>
     </AnimatedBackground>
   );

@@ -1,9 +1,6 @@
 import { create } from "zustand";
-import axios from "axios";
-import { resetPassword } from "../../backend/controllers/auth-controller";
 
 const API_URL = "http://localhost:5000/api/auth";
-axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 
 export const useAuth = create((set) => ({
   user: null,
@@ -238,7 +235,7 @@ export const useAuth = create((set) => ({
         set({ message: data.message });
         return;
       }
-      throw new Error(data.message);
+      throw new Error(data.error);
     } catch (error) {
       set({ error: error.message });
       throw error

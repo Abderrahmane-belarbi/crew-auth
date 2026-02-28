@@ -68,7 +68,7 @@ export default function Home() {
             </Link>
 
             <Link
-              to="/reset-password"
+              to="/reset-password/token"
               className="w-full h-11 rounded-lg border border-border/40 bg-muted/30 hover:bg-muted/70 text-foreground transition-colors font-medium flex items-center justify-center gap-2"
             >
               <span>Reset Password</span>
