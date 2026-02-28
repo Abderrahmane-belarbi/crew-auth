@@ -22,7 +22,8 @@ app.use("/api/auth", authRoutes);
 
 if(process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/dist")));
-  app.get("*", (req, res) => {
+  // Express 5 uses path-to-regexp v8, where catch-all wildcards must be named.
+  app.get("/{*splat}", (req, res) => {
     res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
   })
 }
