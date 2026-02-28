@@ -6,10 +6,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../store/auth-store";
 import { useEffect } from "react";
+import { loginSchema } from "../lib/validation/user-schema";
+import { z } from "zod";
+import { FeedbackAlert } from "../components/shared/feedback-alert";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, error, message, isLoading, clearAuthFeedback } = useAuth();
+  const [inputErrors, setInputErrors] = useState({
+    email: undefined,
+    password: undefined
+  });
   const [input, setInput] = useState({
     email: "",
     password: "",
@@ -24,12 +31,30 @@ export default function Login() {
     setInput((prev) => {
       return { ...prev, [name]: value };
     });
+    setInputErrors((prev) => {
+      return { ...prev, [name]: undefined }
+    })
+  }
+
+  function extractFieldErrors(error) {
+    const flattenError = z.flattenError(error).fieldErrors;
+    return {
+      email: flattenError.email?.[0],
+      password: flattenError.password?.[0]
+    }
+    
   }
 
   async function handleLogin(e) {
     e.preventDefault();
+    const validatedInput = loginSchema.safeParse(input);
+    if(!validatedInput.success) {
+      const errors = extractFieldErrors(validatedInput.error)
+      setInputErrors(errors);
+      return;
+    }
     try {
-      await login(input.email, input.password);
+      await login(validatedInput.data.email, validatedInput.data.password);
     } catch (error) {
       console.log(error);
     }
@@ -38,16 +63,8 @@ export default function Login() {
   return (
     <AuthCard title="Welcome back" subtitle="Sign in to your account">
       <form onSubmit={handleLogin} className="space-y-5">
-        {error && (
-          <p className="text-red-500 text-sm text-center" role="alert">
-            {error}
-          </p>
-        )}
-        {!error && message && (
-          <p className="text-green-500 text-sm text-center" role="status">
-            {message}
-          </p>
-        )}
+        {error && <FeedbackAlert type="error" message={error} />}
+        {message && <FeedbackAlert type="success" message={message} />}
         <InputField
           type="email"
           name="email"
@@ -55,6 +72,7 @@ export default function Login() {
           placeholder="example@email.com"
           value={input.email}
           onChange={handleInputChange}
+          setError={inputErrors.email}
           autoComplete="email"
           required
         />
@@ -65,6 +83,7 @@ export default function Login() {
           placeholder="Password"
           value={input.password}
           onChange={handleInputChange}
+          setError={inputErrors.password}
           autoComplete="current-password"
           required
         />
