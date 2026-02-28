@@ -3,7 +3,11 @@ import nodemailer from "nodemailer";
 export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure: false,
+  secure: Number(process.env.SMTP_PORT) === 465,
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 10_000,
+  debug: process.env.NODE_ENV === "development",
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
